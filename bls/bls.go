@@ -513,6 +513,81 @@ func (sec *SecretKey) Sign(m string) (sig *Sign) {
 	return sig
 }
 
+// BlsPublicKeyToG1 --
+func BlsPublicKeyToG1(pub *PublicKey, g1 *G1) {
+	C.blsPublicKeyToG1(&pub.v, g1.getPointer())
+}
+
+// BlsG1ToPublicKey --
+func BlsG1ToPublicKey(g1 *G1, pub *PublicKey) {
+	C.blsG1ToPublicKey(g1.getPointer(), &pub.v)
+}
+
+// BlsPublicKeyToG2 --
+func BlsPublicKeyToG2(pub *PublicKey, g2 *G2) {
+	C.blsPublicKeyToG2(&pub.v, g2.getPointer())
+}
+
+// BlsG2ToPublicKey --
+func BlsG2ToPublicKey(g2 *G2, pub *PublicKey) {
+	C.blsG2ToPublicKey(g2.getPointer(), &pub.v)
+}
+
+// BlsSignatureToG1 --
+func BlsSignatureToG1(sig *Sign, g1 *G1) {
+	C.blsSignatureToG1(&sig.v, g1.getPointer())
+}
+
+// BlsG1ToSignature --
+func BlsG1ToSignature(g1 *G1, sig *Sign) {
+	C.blsG1ToSignature(g1.getPointer(), &sig.v)
+}
+
+// BlsSignatureToG2 --
+func BlsSignatureToG2(sig *Sign, g2 *G2) {
+	C.blsSignatureToG2(&sig.v, g2.getPointer())
+}
+
+// BlsG2ToSignature --
+func BlsG2ToSignature(g2 *G2, sig *Sign) {
+	C.blsG2ToSignature(g2.getPointer(), &sig.v)
+}
+
+// BlsSecretKeyToFr --
+func BlsSecretKeyToFr(sec *SecretKey, fr *Fr) {
+	C.blsSecretKeyToFr(&sec.v, fr.getPointer())
+}
+
+// BlsFrToSecretKey --
+func BlsFrToSecretKey(fr *Fr, sec *SecretKey) {
+	C.blsFrToSecretKey(fr.getPointer(), &sec.v)
+}
+
+// BlsGetGeneratorForPublicKey
+func BlsGetGeneratorForPublicKey(pub *PublicKey) {
+	C.blsGetGeneratorOfPublicKey(&pub.v)
+}
+
+// BlsAggregateSignatures --
+func BlsAggregateSignatures(aggSignature *Sign, signatures []Sign) {
+	n:= len(signatures)
+	C.blsAggregateSignature(&aggSignature.v, &signatures[0].v, C.mclSize(n))
+}
+
+// BlsFastAggregateVerify --
+func BlsFastAggregateVerify(aggSignature *Sign, pubKeys []PublicKey, m string) bool {
+	n:= len(pubKeys)
+	buf := []byte(m)
+	return C.blsFastAggregateVerify(&aggSignature.v, &pubKeys[0].v, C.mclSize(n), unsafe.Pointer(&buf[0]), C.mclSize(len(buf)))==1
+}
+
+// BlsAggregateVerifyNoCheck --
+func BlsAggregateVerifyNoCheck(aggSignature *Sign, pubKeys []PublicKey, m string) bool {
+	n:= len(pubKeys)
+	buf:=[]byte(m)
+	return C.blsAggregateVerifyNoCheck(&aggSignature.v, &pubKeys[0].v, unsafe.Pointer(&buf[0]), C.mclSize(len(buf)), C.mclSize(n))==1
+}
+
 // Add --
 func (sig *Sign) Add(rhs *Sign) {
 	C.blsSignatureAdd(&sig.v, &rhs.v)

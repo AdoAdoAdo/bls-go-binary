@@ -79,6 +79,67 @@ func TestSign(t *testing.T) {
 	}
 }
 
+func TestSign_SerializeDeserialize(t *testing.T) {
+	_ = Init(BLS12_381)
+	var sec SecretKey
+
+	sec.SetByCSPRNG()
+	fmt.Printf("sec:%s\n", sec.SerializeToHexStr())
+
+	pub := sec.GetPublicKey()
+	fmt.Printf("pub:%s\n", pub.SerializeToHexStr())
+
+	message := "message to sign"
+	sig := sec.Sign(message)
+	fmt.Printf("signature:%s\n", sig.SerializeToHexStr())
+	sigSerialized := sig.Serialize()
+
+	sig2 := &Sign{}
+	err := sig2.Deserialize(sigSerialized)
+	if err != nil {
+		t.Error(err.Error())
+	}
+
+	if !sig.IsEqual(sig2) {
+		t.Error("signatures not equal")
+	}
+
+	if !sig2.Verify(pub, message) {
+		t.Error("signature is not verified")
+	}
+}
+
+func TestConversions(t *testing.T) {
+	_ = Init(BLS12_381)
+	var sec SecretKey
+	sec.SetByCSPRNG()
+	fmt.Printf("sec:%s\n", sec.SerializeToHexStr())
+	pub := sec.GetPublicKey()
+
+	fmt.Printf("pub:%s\n", pub.SerializeToHexStr())
+	g2 := &G2{}
+	pub2 := &PublicKey{}
+	fr := &Fr{}
+	sec2 := &SecretKey{}
+
+	BlsPublicKeyToG2(pub, g2)
+	BlsG2ToPublicKey(g2, pub2)
+
+	if !pub.IsEqual(pub2) {
+		t.Error("public keys not equal")
+	}
+	fmt.Printf("pub2:%s\n", pub2.SerializeToHexStr())
+
+	BlsSecretKeyToFr(&sec, fr)
+	BlsFrToSecretKey(fr, sec2)
+
+	if !sec.IsEqual(sec2) {
+		t.Error("secret keys not equal")
+	}
+
+	fmt.Printf("sec2:%s\n", sec2.SerializeToHexStr())
+}
+
 func TestPairing(t *testing.T) {
 	Init(BLS12_381)
 	var P1, P2 G1
