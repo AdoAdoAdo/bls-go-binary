@@ -143,3 +143,43 @@ func BenchmarkPairing3(b *testing.B) {
 		comparePairing3(&P1, &Q1, &P2, &Q2)
 	}
 }
+
+func TestConversions(t *testing.T) {
+	_ = Init(BLS12_381)
+	var sec SecretKey
+	sec.SetByCSPRNG()
+	t.Logf("sec:%s", sec.SerializeToHexStr())
+	pub := sec.GetPublicKey()
+
+	t.Logf("pub:%s", pub.SerializeToHexStr())
+	g2 := pub.ToG2()
+	pub2 := &PublicKey{}
+	pub2.SetG2(g2)
+
+	if !pub.IsEqual(pub2) {
+		t.Error("public keys not equal")
+	}
+	t.Logf("pub2:%s", pub2.SerializeToHexStr())
+
+	fr := sec.ToFr()
+	sec2 := &SecretKey{}
+	sec2.SetFr(fr)
+
+	if !sec.IsEqual(sec2) {
+		t.Error("secret keys not equal")
+	}
+	t.Logf("sec2:%s", sec2.SerializeToHexStr())
+
+	message := "message to sign"
+	sig := sec.Sign(message)
+	t.Logf("sig:%s", sig.SerializeToHexStr())
+
+	g1 := sig.ToG1()
+	sig2 := &Sign{}
+	sig2.SetG1(g1)
+
+	if !sig.IsEqual(sig2) {
+		t.Error("signatures not equal")
+	}
+	t.Logf("sig2:%s", sig2.SerializeToHexStr())
+}

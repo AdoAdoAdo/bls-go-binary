@@ -329,6 +329,17 @@ func (sec *SecretKey) GetPop() (sig *Sign) {
 	return sig
 }
 
+// ToFr --
+func (sec *SecretKey) ToFr() *Fr {
+	f := &Fr{v: sec.v.v}
+	return f
+}
+
+// SetFr --
+func (sec *SecretKey) SetFr(f *Fr) {
+	sec.v.v = f.v
+}
+
 // PublicKey --
 type PublicKey struct {
 	v C.blsPublicKey
@@ -425,6 +436,52 @@ func (pub *PublicKey) Recover(pubVec []PublicKey, idVec []ID) error {
 		return fmt.Errorf("err blsPublicKeyRecover")
 	}
 	return nil
+}
+
+// ToG1 --
+func (pub *PublicKey) ToG1() *G1 {
+	switch v := interface{}(pub.v.v).(type) {
+	case C.mclBnG1:
+		g := &G1{}
+		*(g.getPointer()) = v
+		return g
+	default:
+		panic("cannot cast PK to G1")
+		return nil
+	}
+}
+
+// SetG1 --
+func (pub *PublicKey) SetG1(g *G1) {
+	switch p := interface{}(&pub.v.v).(type) {
+	case *C.mclBnG1:
+		*p = *(g.getPointer())
+	default:
+		panic("cannot cast G1 to PK")
+	}
+}
+
+// ToG2 --
+func (pub *PublicKey) ToG2() *G2 {
+	switch v := interface{}(pub.v.v).(type) {
+	case C.mclBnG2:
+		g := &G2{}
+		*(g.getPointer()) = v
+		return g
+	default:
+		panic("cannot cast PK to G2")
+		return nil
+	}
+}
+
+// SetG2 --
+func (pub *PublicKey) SetG2(g *G2) {
+	switch p := interface{}(&pub.v.v).(type) {
+	case *C.mclBnG2:
+		*p = *(g.getPointer())
+	default:
+		panic("cannot cast G2 to PK")
+	}
 }
 
 // Sign  --
@@ -547,6 +604,52 @@ func (sig *Sign) VerifyPop(pub *PublicKey) bool {
 		return false
 	}
 	return C.blsVerifyPop(&sig.v, &pub.v) == 1
+}
+
+// ToG1 --
+func (sig *Sign) ToG1() *G1 {
+	switch v := interface{}(sig.v.v).(type) {
+	case C.mclBnG1:
+		g := &G1{}
+		*(g.getPointer()) = v
+		return g
+	default:
+		panic("cannot cast SIG to G2")
+		return nil
+	}
+}
+
+// SetG1 --
+func (sig *Sign) SetG1(g *G1) {
+	switch p := interface{}(&sig.v.v).(type) {
+	case *C.mclBnG1:
+		*p = *(g.getPointer())
+	default:
+		panic("cannot cast G1 to SIG")
+	}
+}
+
+// ToG2 --
+func (sig *Sign) ToG2() *G2 {
+	switch v := interface{}(sig.v.v).(type) {
+	case C.mclBnG2:
+		g := &G2{}
+		*(g.getPointer()) = v
+		return g
+	default:
+		panic("cannot cast SIG to G2")
+		return nil
+	}
+}
+
+// SetG2 --
+func (sig *Sign) SetG2(g *G2) {
+	switch p := interface{}(&sig.v.v).(type) {
+	case *C.mclBnG2:
+		*p = *(g.getPointer())
+	default:
+		panic("cannot cast G2 to SIG")
+	}
 }
 
 // DHKeyExchange --
